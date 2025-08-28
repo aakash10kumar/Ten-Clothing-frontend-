@@ -1,0 +1,189 @@
+/* ===== Products Container ===== */
+.products-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  padding: 20px 0;
+  justify-content: center; /* center the grid */
+  margin: 0 auto; /* centers the container itself */
+  max-width: 1200px; /* optional: keeps it balanced */
+}
+/* ===== Product Card ===== */
+.product-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* keeps height tight */
+  padding: 0; /* remove extra padding */
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Product Image Wrapper ===== */
+img {
+  font-size: 0;   /* hides alt text */
+}
+
+img:before {
+  content: ""; /* ensures no fallback text appears */
+}
+.product-image {
+  position: relative;
+  width: 100%;
+  height: 280px; /* fixed height to keep uniform */
+  overflow: hidden;
+}
+
+.product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* crop but maintain proportions */
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.05);
+}
+
+/* ===== Wishlist Icon ===== */
+.wishlist-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  padding: 6px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgb(230, 94, 196);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+.wishlist-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgb(230, 116, 169);
+}
+
+.wishlist-icon svg {
+  color: rgb(225, 112, 151);
+}
+
+.wishlist-icon.wishlisted svg {
+  color: red;
+}
+
+/* ===== Rating Badge (Transparent) ===== */
+.rating-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.5); /* Transparent black */
+  color: #fff; /* White text for contrast */
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px); /* Glass effect */
+}
+
+.rating-badge .star {
+  color: #ffb400; /* golden star */
+  font-size: 12px;
+}
+
+.rating-badge .count {
+  color: #fff; /* white text for readability */
+  font-size: 12px;
+}
+
+
+/* ===== Product Info ===== */
+.product-info {
+  flex: 1;
+  padding: 10px 12px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* ===== Product Name ===== */
+.product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin: 4px 0;
+  line-height: 1.4;
+
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* ✅ Safari, Chrome, Edge */
+  line-clamp: 2;           /* ✅ Standard property */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+/* ===== Product Price ===== */
+.product-price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+
+.product-price .discounted-price {
+  color: #d32f2f;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.product-price .old-price {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.product-price .discount-badge {
+  background-color: #ff3f6c;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* ===== Add to Cart Button ===== */
+.add-to-cart-btn {
+  margin-top: auto;
+  display: block;
+  width: calc(100% - 24px);
+  margin: 8px auto 12px;
+  background-color: #ff3f6c;
+  color: white;
+  border: none;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-to-cart-btn:hover {
+  background-color: #e0315b;
+}

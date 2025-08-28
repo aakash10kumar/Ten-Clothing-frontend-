@@ -1,0 +1,456 @@
+/* ===== Base Layout ===== */
+body {
+  background-color: #f5f5f6;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.checkout-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+  margin-top: 80px;
+}
+
+/* ===== Left Section ===== */
+.checkout-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.checkout-section {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  border-radius: 6px;
+}
+
+.checkout-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3e4152;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+/* ===== Address Card ===== */
+.address-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.address-card.selected {
+  border: 1.5px solid #ff3f6c;
+  background: #fff4f7;
+}
+
+.address-card input[type="radio"] {
+  margin-top: 5px;
+}
+
+.address-card .name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.address-card span {
+  font-size: 12px;
+  color: #888;
+}
+
+.address-card p {
+  font-size: 13px;
+  margin: 3px 0;
+}
+
+.edit-btn {
+  margin-left: auto;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid #ff3f6c;
+  color: #ff3f6c;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background: #ff3f6c;
+  color: #fff;
+}
+
+.add-address-btn {
+  width: 100%;
+  padding: 8px;
+  background: #fff;
+  border: 1px dashed #ff3f6c;
+  color: #ff3f6c;
+  font-size: 14px;
+  border-radius: 4px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.add-address-btn:hover {
+  background: #fff4f7;
+}
+
+/* ===== Payment Cards ===== */
+.payment-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  background: #fff;
+
+  display: flex;
+  justify-content: space-between; /* pushes radio to the right */
+  align-items: center;
+  gap: 15px;
+}
+
+.payment-card.selected {
+  border: 2px solid #7b1fa2;
+  background: #fdf4fb;
+}
+/* Checkout-specific price */
+.checkout-section .price {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #e53935; /* red shade for checkout */
+}
+
+.payment-row {
+  display: flex;
+  flex-direction: column; /* keep price & text stacked */
+  gap: 4px;
+  flex: 1; /* take full left space */
+}
+
+.original-price {
+  font-size: 13px;
+  text-decoration: line-through;
+  color: #888;
+}
+
+.discounted-price {
+font-size: 1.4rem;
+  font-weight: 600;
+  color: #e53935;
+}
+
+.save-text {
+  font-size: 12px;
+  color: #03a685;
+}
+
+.radio-circle {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #7b1fa2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-circle .checked {
+  width: 8px;
+  height: 8px;
+  background: #7b1fa2;
+  border-radius: 50%;
+}
+
+/* ===== Online Options ===== */
+.online-options {
+  margin-top: 12px;
+  width: 100%;
+}
+
+/* ==== UPI Section Card ==== */
+.upi-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;  
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+}
+
+.upi-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Title + radio aligned */
+.upi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.upi-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Radio button */
+.radio-circle {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #7b1fa2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.radio-circle .checked {
+  width: 8px;
+  height: 8px;
+  background: #7b1fa2;
+  border-radius: 50%;
+}
+
+/* UPI icons row */
+.upi-icons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.upi-icons img {
+  width: 40px;
+  height: 40px;
+}
+
+/* QR Section */
+.qr-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 14px 0;
+}
+
+.qr-image {
+  width: 180px;
+  height: 180px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 6px;
+  background: #fafafa;
+}
+
+.qr-timer {
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+  margin-top: 6px;
+}
+
+.qr-timer .highlight {
+  color: red;
+  font-weight: 600;
+}
+
+.view-qr-btn {
+  background: #7b1fa2;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 8px auto;
+  display: block;
+}
+
+.view-qr-btn:hover {
+  background: #6a1b9a;
+}
+
+/* Add UPI Section */
+.add-upi {
+  margin-top: 16px;
+  color: #7b2cbf;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+
+.upi-input {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.upi-input input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.upi-submit {
+  background: #03a685;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.upi-submit:hover {
+  background: #028a6e;
+}
+
+/* ===== Order Items ===== */
+.checkout-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.checkout-item img {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.checkout-item h4 {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.checkout-item p {
+  font-size: 13px;
+  color: #555;
+}
+
+.remove-btn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #ff3f6c;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  text-decoration: underline;
+}
+
+/* ===== Right Section ===== */
+.checkout-right {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 6px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.price-summary h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.price-summary p {
+  font-size: 14px;
+  margin: 6px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.discount {
+  color: #03a685;
+  font-weight: 500;
+}
+
+.free {
+  color: #03a685;
+  font-weight: 500;
+}
+
+.price-summary h2 {
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ===== Place Order Button ===== */
+.place-order-btn {
+  width: 100%;
+  background: #ff3f6c;
+  color: white;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.place-order-btn:hover {
+  background: #e23760;
+}
+
+/* ===== Empty Cart ===== */
+.checkout-empty {
+  text-align: center;
+  padding: 50px;
+}
+
+.checkout-empty h2 {
+  margin-bottom: 15px;
+}
+
+.checkout-empty button {
+  padding: 10px 20px;
+  background: #ff3f6c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.checkout-empty button:hover {
+  background: #e23760;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .checkout-container {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-right {
+    position: static;
+  }
+}

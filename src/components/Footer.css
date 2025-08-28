@@ -1,0 +1,184 @@
+/* Footer.css */
+.footer {
+  background-color: #111; /* Dark background */
+  color: #fff;
+  padding: 50px 80px 20px; /* More height for a lengthier look */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* Left side (logo + desc + social) */
+.logo-section {
+  flex: 1 1 280px;
+  max-width: 320px;
+}
+
+.footer-logo img {
+  max-width: 120px;   /* adjust to your design */
+  height: auto;       /* keeps aspect ratio */
+  object-fit: contain;
+  display: block;
+}
+
+.logo-section p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: #ddd;
+}
+
+.social-icons {
+  display: flex;
+   gap: 12px; 
+   font-size: 1.2rem; 
+   color: #ccc;
+}
+
+.social-icons a {
+  font-size: 20px;
+   color: #fff; 
+   transition: transform 0.3s, color 0.3s;
+}
+
+.social-icons a:hover {
+  color: #f06292;
+   transform: translateY(-5px) scale(1.1);
+}
+
+/* Right side grid sections */
+.footer-right {
+  flex: 2 1 600px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 25px 40px;
+}
+
+.footer-section h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.footer-section h3::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+
+}
+
+.footer-section p {
+  font-size: 14px;
+  margin: 6px 0;
+  color: #bbb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.footer-section p:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Divider line */
+.footer-divider {
+  height: 1px;
+  background-color: #333;
+  margin: 30px 0;
+}
+
+/* Bottom bar */
+.footer-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-links p {
+  font-size: 13px;
+  color: #bbb;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.footer-links p:hover {
+  color: #ea71b5;
+  text-decoration: underline;
+}
+
+.footer-logo img {
+  width: 120px;
+  margin-top: 5px;
+  animation: logoBounce 3s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+/* Hover effect */
+.footer-logo img:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Keyframes for bounce effect */
+@keyframes logoBounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+
+.footer-bottom p {
+  font-size: 13px;
+  color: #777;
+  margin-top: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer {
+    padding: 40px 30px 20px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-right {
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-right {
+    grid-template-columns: 1fr;
+  }
+
+  .logo-img {
+    width: 130px;
+  }
+}

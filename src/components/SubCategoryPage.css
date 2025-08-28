@@ -1,0 +1,52 @@
+.subcategory-page {
+  padding: 20px;
+  margin-top: 80px; /* adjust for navbar */
+  max-width: 1280px;   /* ✅ like Myntra, fixed width */
+  margin-left: auto;   /* ✅ center the whole page */
+  margin-right: auto;
+}
+
+/* ✅ Centers the product cards grid */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  justify-content: center;   /* center items */
+  margin: 0 auto;            /* equal space on left & right */
+  max-width: 1200px;         /* keeps layout neat */
+  width: 100%;
+}
+
+.subcategory-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* ✅ responsive grid */
+  gap: 20px;
+  justify-content: start;  /* ✅ align like Myntra (left aligned inside container) */
+}
+
+.subcategory-item {
+  text-decoration: none;
+  color: #333;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.subcategory-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.subcategory-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.subcategory-item span {
+  display: block;
+  padding: 10px;
+  font-weight: 500;
+}
