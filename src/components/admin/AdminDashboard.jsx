@@ -93,19 +93,12 @@ function AdminDashboard({ onLogout }) {
   const handleDeleteCustomer = id => {
     setCustomers(prev => prev.filter(c => c.id !== id));
   };
- const handleDownloadReport = (rep) => {
-  const csvContent = `Report Name,Date\n${rep.name},${rep.date}`;
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-   link.setAttribute('download', `${rep.name.replace(/\s+/g, '_')}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+ 
+  // MODIFIED: Show only alert instead of file download
+  const handleDownloadReport = (rep) => {
+    alert(`Downloading: ${rep.name}`);
+  };
+  
 const handleEditProductClick = (productId) => {
   const product = products.find(p => p.id === productId);
   if (product) {
@@ -537,7 +530,10 @@ const handleEditProductClick = (productId) => {
       </aside>
       <main className="admin-main">
         <header className="admin-header">
-          <input type="text" placeholder="Search products, orders..." />
+          {!(activeSection === 'Categories' || activeSection === 'Settings') && (
+    <input type="text" placeholder="Search products, orders..." />
+)}
+
           <div className="admin-user">
             <span>admin@clothing.com</span>
             <div className="admin-avatar">A</div>
