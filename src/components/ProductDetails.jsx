@@ -10,37 +10,46 @@ import empty_cart from "../assets/empty_cart.jpeg";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// Font Awesome (needed for star icons)
+import "@fortawesome/fontawesome-free/css/all.min.css";
+
+
+
 const ProductDetails = () => {
-  const navigate = useNavigate();
+   const navigate = useNavigate();
   const { id } = useParams();
   const { addToCart } = useCart();
 
+  const reviewsRef = useRef(null);
+
+  // Find product
   const product = products.find((item) => item.id.toString() === id);
+
+  // ---------------- STATES ----------------
   const [selectedImage, setSelectedImage] = useState(product?.image || "");
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // ---------------- REVIEWS ----------------
-  const reviewsRef = useRef(null); // ref for scroll
-  const scrollToReviews = () => {
-    if (reviewsRef.current) {
-      reviewsRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
+  // Reviews
   const [reviews, setReviews] = useState(() => {
     const saved = localStorage.getItem(`reviews-${id}`);
     return saved ? JSON.parse(saved) : [];
   });
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [title, setTitle] = useState("");
+  const [photo, setPhoto] = useState(null);
 
+  const [filter, setFilter] = useState("all");
+  const [sort, setSort] = useState("recent");
+
+  // ---------------- EFFECTS ----------------
   useEffect(() => {
     localStorage.setItem(`reviews-${id}`, JSON.stringify(reviews));
   }, [reviews, id]);
 
+  // ---------------- SAFE RETURN ----------------
   if (!product) {
     return (
       <div className="product-not-found">
@@ -50,65 +59,100 @@ const ProductDetails = () => {
     );
   }
 
+  // ---------------- HELPERS ----------------
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
+
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPhoto(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const filteredReviews = reviews
+    .filter((r) => {
+      if (filter === "photos") return r.photo;
+      if (filter !== "all") return r.rating === parseInt(filter);
+      return true;
+    })
+    .sort((a, b) => {
+      if (sort === "recent") return b.date - a.date;
+      if (sort === "high") return b.rating - a.rating;
+      if (sort === "low") return a.rating - b.rating;
+      return 0;
+    });
+
+  const handleSubmitReview = () => {
+    if (!rating || !comment.trim()) {
+      toast.error("Please provide both rating and comment");
+      return;
+    }
+    const newReview = {
+      rating,
+      title,
+      comment,
+      photo,
+      name: "Guest User",
+      verified: true,
+      profilePic: "/default-avatar.png",
+      date: Date.now(),
+    };
+    setReviews([...reviews, newReview]);
+    setRating(0);
+    setTitle("");
+    setComment("");
+    setPhoto(null);
+    toast.success("Review submitted ✅", { autoClose: 1500 });
+  };
+
   // ---------------- CART ----------------
   const handleAddToCart = () => {
     if (product.sizes?.length > 0 && !selectedSize) {
       toast.error("Please select a size before adding to cart");
       return;
     }
-
     const productWithOptions = {
       ...product,
       size: selectedSize || "M",
       color: selectedColor || product.colors?.[0]?.name || "Default",
       image: selectedImage || product.image,
     };
-
     addToCart(productWithOptions);
     toast.success(`${product.name} added to cart 🛒`, { autoClose: 1500 });
     navigate("/cart");
   };
 
-  // ---------------- BUY NOW ----------------
   const handleBuyNow = () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
-
     if (!isLoggedIn) {
       setShowLoginPrompt(true);
       toast.warning("⚠️ Please log in to continue checkout", { autoClose: 2000 });
       return;
     }
-
     if (product.sizes?.length > 0 && !selectedSize) {
       toast.error("Please select a size before checkout");
       return;
     }
-
     const productWithOptions = {
       ...product,
       size: selectedSize || "M",
       color: selectedColor || product.colors?.[0]?.name || "Default",
       image: selectedImage || product.image,
     };
-
     addToCart(productWithOptions);
     toast.success(`Proceeding to checkout with ${product.name} ✅`, {
       autoClose: 1500,
     });
     navigate("/checkout");
-  };
-
-  // ---------------- REVIEWS ----------------
-  const handleSubmitReview = () => {
-    if (!rating || !comment.trim()) {
-      toast.error("Please provide both rating and comment");
-      return;
-    }
-    const newReview = { rating, comment };
-    setReviews([...reviews, newReview]);
-    setRating(0);
-    setComment("");
-    toast.success("Review submitted ✅", { autoClose: 1500 });
   };
 
   return (
@@ -162,21 +206,18 @@ const ProductDetails = () => {
               {/* Rating */}
               <div
                 className="rating-summary-badge"
-                onClick={scrollToReviews} // scrolls to reviews
+                onClick={scrollToReviews}
               >
                 <span className="avg-rating">
                   {reviews.length > 0
-                    ? (
-                        reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-                      ).toFixed(1)
-                    : product.rating || "3.5"}
+                    ? averageRating.toFixed(1)
+                    : product.rating || "3.5"}{" "}
                   ⭐
                 </span>
                 <span className="total-reviews">
                   ({reviews.length > 0 ? reviews.length : product.reviews || "1000+"})
                 </span>
               </div>
-
 
               {/* Price Section */}
               <div className="price-section">
@@ -207,7 +248,8 @@ const ProductDetails = () => {
                     {product.colors.map((colorVariant, index) => {
                       const colorCode = colorVariant.code || "";
                       const isWhite =
-                        colorCode.toLowerCase() === "#ffffff" || colorCode.toLowerCase() === "white";
+                        colorCode.toLowerCase() === "#ffffff" ||
+                        colorCode.toLowerCase() === "white";
 
                       return (
                         <div
@@ -318,40 +360,138 @@ const ProductDetails = () => {
           <div className="reviews-section" ref={reviewsRef}>
             <h3>Customer Reviews</h3>
 
+            {/* Rating Summary */}
+            <div className="rating-summary">
+              <div className="avg-rating">
+                <span className="avg-score">{averageRating.toFixed(1)}</span>
+                <div className="stars">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <i
+                      key={star}
+                      className={`fa-star ${
+                        star <= Math.round(averageRating) ? "fas" : "far"
+                      }`}
+                    ></i>
+                  ))}
+                </div>
+                <p>{reviews.length} Reviews</p>
+              </div>
+
+              <div className="rating-distribution">
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const count = reviews.filter((r) => r.rating === star).length;
+                  const percent = (count / reviews.length) * 100 || 0;
+                  return (
+                    <div key={star} className="rating-bar">
+                      <span>{star} ★</span>
+                      <div className="bar">
+                        <div className="fill" style={{ width: `${percent}%` }}></div>
+                      </div>
+                      <span>{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Filter & Sort */}
+            <div className="review-controls">
+              <select onChange={(e) => setFilter(e.target.value)}>
+                <option value="all">All Reviews</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+                <option value="photos">With Photos</option>
+              </select>
+              <select onChange={(e) => setSort(e.target.value)}>
+                <option value="recent">Most Recent</option>
+                <option value="high">Highest Rated</option>
+                <option value="low">Lowest Rated</option>
+              </select>
+            </div>
+
+            {/* Write Review */}
             <div className="review-form">
-              <label>Rate this product:</label>
+                <h3> Write a Review</h3>
+              <label><h4>Your Rating</h4></label>
               <div className="stars">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span
+                  <i
                     key={star}
-                    className={star <= rating ? "star selected" : "star"}
+                    className={`fa-star ${star <= rating ? "fas selected" : "far"}`}
                     onClick={() => setRating(star)}
-                  >
-                    ⭐
-                  </span>
+                  ></i>
                 ))}
               </div>
+
+              <input
+                type="text"
+                placeholder="Review Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+
               <textarea
                 placeholder="Write your review..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
+
+              <input type="file" accept="image/*" onChange={handlePhotoUpload} />
+
               <button onClick={handleSubmitReview}>Submit Review</button>
             </div>
 
-            <div className="review-list">
-              {reviews.length === 0 ? (
-                <p>No reviews yet. Be the first!</p>
-              ) : (
-                reviews.map((rev, index) => (
-                  <div key={index} className="review-card">
-                    <div className="review-rating">{"⭐".repeat(rev.rating)}</div>
-                    <p>{rev.comment}</p>
-                  </div>
-                ))
-              )}
+            {/* Reviews Grid */}
+<div className="review-list">
+  {filteredReviews.length === 0 ? (
+    <p>No reviews yet. Be the first!</p>
+  ) : (
+    filteredReviews.map((rev, index) => (
+      <div key={index} className="review-card">
+        <div className="review-header">
+          <img
+            src={rev.profilePic || "/default-avatar.png"}
+            alt={rev.name}
+            className="profile-pic"
+          />
+          <div className="review-meta">
+            <div className="reviewer-name">{rev.name}</div>
+            <div className="review-stars-time">
+              <div className="stars">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <i
+                    key={star}
+                    className={`fa-star ${star <= rev.rating ? "fas" : "far"}`}
+                  ></i>
+                ))}
+              </div>
+              <span className="time">
+                {rev.date ? new Date(rev.date).toLocaleDateString() : "recently"}
+              </span>
             </div>
           </div>
+        </div>
+
+        <h4 className="review-title">{rev.title}</h4>
+        <p className="review-text">{rev.comment}</p>
+
+        {rev.photo && (
+          <div className="review-photos">
+            <img src={rev.photo} alt="review" />
+          </div>
+        )}
+
+        {rev.verified && (
+          <span className="verified">✔ Verified Purchase</span>
+        )}
+      </div>
+    ))
+  )}
+ </div>
+   </div>
         </>
       )}
     </>

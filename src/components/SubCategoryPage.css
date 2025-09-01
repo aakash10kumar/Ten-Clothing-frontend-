@@ -1,29 +1,22 @@
+/* ✅ Base subcategory page layout */
 .subcategory-page {
   padding: 20px;
   margin-top: 80px; /* adjust for navbar */
-  max-width: 1280px;   /* ✅ like Myntra, fixed width */
-  margin-left: auto;   /* ✅ center the whole page */
+  max-width: 1280px;   /* like Myntra, fixed page width */
+  margin-left: auto;
   margin-right: auto;
 }
 
-/* ✅ Centers the product cards grid */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  justify-content: center;   /* center items */
-  margin: 0 auto;            /* equal space on left & right */
-  max-width: 1200px;         /* keeps layout neat */
-  width: 100%;
-}
-
+/* ✅ Subcategories grid (Men → T-shirts, Shirts, etc.) */
 .subcategory-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* ✅ responsive grid */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
-  justify-content: start;  /* ✅ align like Myntra (left aligned inside container) */
+  justify-content: start;   /* left aligned */
+  margin-bottom: 30px;
 }
 
+/* ✅ Individual subcategory card */
 .subcategory-item {
   text-decoration: none;
   color: #333;
@@ -33,20 +26,45 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .subcategory-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
-
 .subcategory-img {
   width: 100%;
   height: 120px;
   object-fit: cover;
 }
-
 .subcategory-item span {
   display: block;
   padding: 10px;
   font-weight: 500;
+}
+
+/* ✅ Product grid (covers whole space neatly if only products) */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Special case: exactly 1 product */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Special case: 1, 2 or 3 products → center them with fixed card width */
+.products-grid:has(> :only-child),
+.products-grid:has(> :nth-child(2):last-child),
+.products-grid:has(> :nth-child(3):last-child) {
+  grid-template-columns: repeat(auto-fit, 300px); /* fixed card width */
+  justify-content: start;
 }

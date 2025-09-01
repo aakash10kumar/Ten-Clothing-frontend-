@@ -155,7 +155,7 @@ const Checkout = () => {
             >
               <div className="payment-row">
                 <p className="price">₹{totalPrice}</p>
-                <p className="payment-title">Cash on Delivery</p>
+                <p className="payment-title"> <i className="fa-solid fa-truck"></i>Cash on Delivery</p>
               </div>
               <div className="radio-circle">
                 {selectedPayment === "COD" && <span className="checked"></span>}
@@ -173,7 +173,7 @@ const Checkout = () => {
     <p className="original-price">₹{totalPrice}</p>
     <p className="discounted-price">₹{discountedPrice}</p>
     <p className="save-text">Save ₹21</p>
-    <p className="payment-title">Pay Online</p>
+    <p className="payment-title"> <i className="fa-solid fa-credit-card"></i>Pay Online</p>
   </div>
   <div className="radio-circle">
     {selectedPayment === "ONLINE" && <span className="checked"></span>}
