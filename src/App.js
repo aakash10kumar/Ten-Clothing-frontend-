@@ -118,6 +118,7 @@ function AppRoutes({ isAdminLoggedIn, handleAdminLogin, handleAdminLogout }) {
         />
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/forgotpassword" element={<AdminForgotPassword />} />
+      
       </Routes>
        {/* Footer always visible */}
       <Footer />

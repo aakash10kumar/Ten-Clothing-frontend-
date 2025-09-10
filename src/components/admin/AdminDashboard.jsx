@@ -17,17 +17,17 @@ function AdminDashboard({ onLogout }) {
 
   // --- STATE ARRAYS ---
   const [orders] = useState([
-    { orderNumber: '1001', poNumber: 'PO-501', orderDate: '2025-08-10', customer: 'John Doe', status: 'Pending Acceptance', total: '₹3,200' },
-    { orderNumber: '1002', poNumber: 'PO-502', orderDate: '2025-08-11', customer: 'Jane Smith', status: 'Shipped', total: '₹7,500' },
-    { orderNumber: '1003', poNumber: 'PO-503', orderDate: '2025-08-12', customer: 'Venishetti Sangeetha', status: 'Backordered', total: '₹1,150' },
-    { orderNumber: '1004', poNumber: 'PO-504', orderDate: '2025-08-13', customer: 'Alice Brown', status: 'Processing', total: '₹4,000' },
-    { orderNumber: '1005', poNumber: 'PO-505', orderDate: '2025-08-14', customer: 'Charlie Davis', status: 'Delivered', total: '₹2,000' },
-    { orderNumber: '1006', poNumber: 'PO-506', orderDate: '2025-08-15', customer: 'Surya', status: 'Processing', total: '₹6,000' },
-    { orderNumber: '1007', poNumber: 'PO-507', orderDate: '2025-08-16', customer: 'Akhila', status: 'On the way', total: '₹7,000' },
-    { orderNumber: '1008', poNumber: 'PO-508', orderDate: '2025-08-19', customer: 'Lahari', status: 'Processing', total: '₹4,000' },
-    { orderNumber: '1009', poNumber: 'PO-509', orderDate: '2025-08-25', customer: 'Mokkapati Sampath', status: 'Shipped', total: '₹5,500' },
+   { orderNumber: "1001", poNumber: "PO-501", orderDate: "2025-08-10", customer: "John Doe", status: "Pending Acceptance", total: "₹3,200" },
+    { orderNumber: "1002", poNumber: "PO-502", orderDate: "2025-08-11", customer: "Jane Smith", status: "Shipped", total: "₹7,500" },
+    { orderNumber: "1003", poNumber: "PO-503", orderDate: "2025-08-12", customer: "Venishetti Sangeetha", status: "Backordered", total: "₹1,150" },
+    { orderNumber: "1004", poNumber: "PO-504", orderDate: "2025-08-13", customer: "Alice Brown", status: "Processing", total: "₹4,000" },
+    { orderNumber: "1005", poNumber: "PO-505", orderDate: "2025-08-14", customer: "Charlie Davis", status: "Delivered", total: "₹2,000" },
+    { orderNumber: "1006", poNumber: "PO-506", orderDate: "2025-08-15", customer: "Surya", status: "Processing", total: "₹6,000" },
+    { orderNumber: "1007", poNumber: "PO-507", orderDate: "2025-08-16", customer: "Akhila", status: "On the way", total: "₹7,000" },
+    { orderNumber: "1008", poNumber: "PO-508", orderDate: "2025-08-19", customer: "Lahari", status: "Processing", total: "₹4,000" },
+    { orderNumber: "1009", poNumber: "PO-509", orderDate: "2025-08-25", customer: "Mokkapati Sampath", status: "Shipped", total: "₹5,500" },
   ]);
-
+  
   const [customers] = useState([
     { id: 1, name: 'Keerthi', email: 'keerthi123@gmail.com', phone: '9876543210' },
     { id: 2, name: 'Surya', email: 'surya912@gmail.com', phone: '9123456780' },
@@ -41,14 +41,15 @@ function AdminDashboard({ onLogout }) {
   ]);
 
   const [inventory] = useState([
-    { product: 'Kids Frocks', stock: 60, reorderLevel: 10 },
-    { product: "Men's Kurta", stock: 50, reorderLevel: 20 },
-    { product: "Women's Traditional Wear", stock: 15, reorderLevel: 20 },
-    { product: 'Evening Gown', stock: 0, reorderLevel: 10 },
-    { product: 'Kids Jeans', stock: 0, reorderLevel: 10 },
-    { product: "Women's Kurta Sets", stock: 50, reorderLevel: 20 },
-    { product: "Men's Shirts", stock: 0, reorderLevel: 10 },
-  ]);
+   { product: 'Kids Frocks', stock: 60, reorderLevel: 10 },
+  { product: "Men's Kurta", stock: 50, reorderLevel: 20 },
+  { product: "Women's Traditional Wear", stock: 15, reorderLevel: 20 },
+  { product: 'Kids Jeans', stock: 40, reorderLevel: 20 },
+  { product: 'Evening Gown', stock: 0, reorderLevel: 10 },    
+  { product: 'Kids jeans', stock: 0, reorderLevel: 10 },
+  { product: "Women's Kurta Sets", stock: 50, reorderLevel: 20 },
+  { product: "Men's Shirts", stock: 0, reorderLevel: 10 },
+]);
 
   // --- LOGOUT ---
   const handleLogoutClick = () => {
