@@ -131,6 +131,100 @@ img {
   }
 }
 
+/* Show desktop only */
+.desktop-hero {
+  display: block;
+}
+.mobile-hero {
+  display: none;
+}
+
+
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .desktop-hero {
+    display: none;
+  }
+  .mobile-hero {
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-image-mobile {
+    width: 100%;
+    height: auto;        /* let height adjust naturally */
+    object-fit: contain; /* show whole image, keep aspect ratio */
+  }
+
+  
+
+  .hero-overlay-mobile {
+  position: absolute;
+  top: 80%;        /* middle vertically */
+  left: 10%;       /* push from left edge */
+  transform: translateY(-50%);  /* perfect vertical centering */
+  text-align: left;
+}
+
+
+
+  .shop-now-btn-mobile {
+  padding: 12px 24px;
+  background: #ff3366;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 25px;
+  text-decoration: none;
+  transition: 0.3s;
+   margin-top: 15px;
+  }
+  .shop-now-btn-mobile:hover{
+    background: #e63946;
+  }
+  .hero-arrow-mobile {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 6px;
+    cursor: pointer;
+  }
+
+  .hero-arrow-mobile.left {
+    left: 10px;
+  }
+  .hero-arrow-mobile.right {
+    right: 10px;
+  }
+
+  .hero-dots-mobile {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .hero-dots-mobile .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    cursor: pointer;
+  }
+
+  .hero-dots-mobile .dot.active {
+    background: #000;
+  }
+}
 
 /* Categories Section */
 
@@ -286,20 +380,19 @@ img {
   font-weight: 600;
   color: #222;
 }
+/* Featured Products Grid */
 .featured-products-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 25px;
-  justify-content: center;  /* center the grid as a whole */
-   max-width: 1200px;   /* limit width */
-  margin: 0 auto;
-  
+  justify-content: center;   /* ✅ center the grid */
+  max-width: 1200px;
+  margin: 0 auto;            /* ✅ center grid container */
 }
 
-
-/* Target only ProductCards inside Featured Section */
+/* Product Card */
 .featured .product-card {
-  width: 220px;
+  width: 220px;              /* ✅ fixed card width */
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -307,12 +400,36 @@ img {
   transition: transform 0.3s ease;
   cursor: pointer;
   text-align: center;
-  
-  padding: 0; /* remove extra padding */
 }
 
 .featured .product-card:hover {
   transform: translateY(-6px);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .featured-products-list {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .featured-products-list {
+    grid-template-columns: repeat(2, 1fr); /* ✅ 2 cards per row */
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-products-list {
+    grid-template-columns: 1fr; /* ✅ 1 card per row */
+    justify-items: center;      /* ✅ centers the single card */
+  }
+
+  .featured .product-card {
+    width: 90%; /* ✅ make it take most of the width but stay centered */
+    max-width: 300px;
+  }
 }
 
 /* IMAGE STYLING */

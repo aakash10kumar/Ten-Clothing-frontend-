@@ -234,8 +234,19 @@ const handleEditProductClick = (productId) => {
         <label>Country</label>
         <input type="text" value={productForm.country} onChange={e => setProductForm({ ...productForm, country: e.target.value })} required />
 
-        <label>Image URL</label>
-        <input type="text" value={productForm.image} onChange={e => setProductForm({ ...productForm, image: e.target.value })} required />
+        <label>Upload Images</label>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => {
+            // Convert FileList to an array
+            const files = Array.from(e.target.files);
+            setProductForm({ ...productForm, images: files });
+          }}
+          required
+        />
+
 
         <label>Fabric</label>
         <input type="text" value={productForm.fabric} onChange={e => setProductForm({ ...productForm, fabric: e.target.value })} required />

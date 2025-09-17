@@ -1,46 +1,178 @@
-/* ========== Global Container ========== */
-.profile-container {
-  max-width: 900px;
-  margin: 40px auto;
+/* ========== Layout ========== */
+.profile-wrapper {
+  display: flex;
+  max-width: 1200px;
+  margin: 30px auto;
+  gap: 25px;
   padding: 20px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
-  background-color: #f5f6f9;
+  margin-top: 80PX;
 }
 
-.profile-title {
+/* ========== Sidebar ========== */
+.profile-sidebar {
+  flex: 0 0 280px;
+  background: #fff;
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 30px;
-  color: #222;
-  font-weight: 600;
 }
 
-/* ========== Card Style (Myntra-like panels) ========== */
+.profile-avatar {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 15px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.edit-avatar-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: #ff3366;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-avatar-btn:hover {
+  background: #e63946;
+}
+
+
+.profile-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 12px 0 4px;
+}
+
+.profile-subtext {
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 20px;
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f7f7f9;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #333;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.sidebar-btn:hover {
+  background: #ececec;
+}
+
+.logout-btn {
+  background: #ffe5e9;
+  color: #e63946;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background: #ffd6dc;
+}
+
+/* ========== Content ========== */
+.profile-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Cards */
 .profile-card {
   background: #fff;
   padding: 20px;
-  margin-bottom: 25px;
   border-radius: 12px;
   box-shadow: 0 3px 8px rgba(0,0,0,0.08);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
 .profile-card h3 {
-  margin-bottom: 15px;
-  font-size: 1.2rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
-/* ========== User Info ========== */
+/* Info rows */
 .profile-card p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 8px 0;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+/* ========== Orders ========== */
+.order-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #fafbfc;
+  padding: 12px 15px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.order-card strong {
   font-size: 0.95rem;
 }
 
-/* ========== Address Cards ========== */
-.address-box {
+.order-right {
+  text-align: right;
+}
+
+.status-badge {
+  display: inline-block;
+  background: #d4edda;
+  color: #155724;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* ========== Addresses ========== */
+.address-card {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -51,30 +183,16 @@
   border: 1px solid #e5e7eb;
 }
 
-.address-box h4 {
-  margin: 0 0 6px;
-  font-size: 1rem;
-  color: #444;
-  font-weight: 600;
-}
-
-.address-box p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #555;
-}
-
 .address-actions {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
-/* ========== Buttons ========== */
+/* Buttons */
 .primary-btn {
   background: #ff3f6c;
   color: #fff;
-  padding: 8px 18px;
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -104,7 +222,7 @@
 
 .delete-btn {
   background: #dc3545;
-  color: white;
+  color: #fff;
   padding: 7px 14px;
   border: none;
   border-radius: 8px;
@@ -117,37 +235,18 @@
   background: #c82333;
 }
 
-.logout-card {
-  text-align: center;
-}
-
-.logout-btn {
-  background: #444;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.2s;
-}
-
-.logout-btn:hover {
-  background: #222;
-}
-
-/* ========== Modal (Add/Edit Address) ========== */
+/* ========== Modal ========== */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.55);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .modal {
@@ -155,16 +254,14 @@
   padding: 25px;
   border-radius: 12px;
   width: 400px;
-  max-width: 90%;
+  max-width: 95%;
   box-shadow: 0 6px 20px rgba(0,0,0,0.2);
   animation: slideDown 0.3s ease;
 }
 
 .modal h3 {
+  font-size: 1.1rem;
   margin-bottom: 15px;
-  font-size: 1.2rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
   font-weight: 600;
 }
 
@@ -175,7 +272,7 @@
   margin-bottom: 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .modal textarea {
@@ -190,42 +287,27 @@
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
+  from { transform: translateY(-15px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
 /* ========== Responsive ========== */
-@media (max-width: 600px) {
-  .profile-container {
+@media (max-width: 768px) {
+  .profile-wrapper {
+    flex-direction: column;
     padding: 15px;
   }
 
-  .address-box {
+  .profile-sidebar {
+    flex: none;
+  }
+
+  .address-card {
     flex-direction: column;
     gap: 10px;
   }
 
   .address-actions {
-    flex-direction: row;
+    justify-content: flex-end;
   }
-
-  .modal {
-    width: 95%;
-  }
-}
-/* Address Type Radio Buttons */
-.address-type {
-  display: flex;
-  gap: 15px;
-  margin: 10px 0 15px;
-}
-
-.address-type label {
-  font-size: 0.9rem;
-  color: #444;
-  cursor: pointer;
-}
-
-.address-type input {
-  margin-right: 6px;
 }

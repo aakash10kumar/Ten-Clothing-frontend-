@@ -62,41 +62,65 @@ function HomePage() {
     <div className="app">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="hero">
-        <img src={heroImages[currentSlide]} alt="Hero" className="hero-image" />
+   {/* Hero Section (Desktop) */}
+<section className="hero desktop-hero">
+  <img src={heroImages[currentSlide]} alt="Hero" className="hero-image" />
+  <div className="hero-overlay">
+    <div className="hero-center"></div>
+    <div className="hero-right">
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: [1, 1.1, 1], opacity: 1 }}
+        transition={{ duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatDelay: 3 }}
+      >
+        <Link to="/all-products" className="shop-now-btn">
+          Shop Now →
+        </Link>
+      </motion.div>
+    </div>
+  </div>
 
-        {/* Overlay content */}
-        <div className="hero-overlay">
-          <div className="hero-center"></div>
-          <div className="hero-right">
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: [1, 1.1, 1], opacity: 1 }}
-              transition={{ duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Link to="/all-products" className="shop-now-btn">
-                Shop Now →
-              </Link>
-            </motion.div>
-          </div>
-        </div>
+  {/* Arrows */}
+  <button className="hero-arrow left" onClick={prevSlide}>❮</button>
+  <button className="hero-arrow right" onClick={nextSlide}>❯</button>
 
-        {/* Arrows */}
-        <button className="hero-arrow left" onClick={prevSlide}>❮</button>
-        <button className="hero-arrow right" onClick={nextSlide}>❯</button>
+  {/* Dots */}
+  <div className="hero-dots">
+    {heroImages.map((_, index) => (
+      <span
+        key={index}
+        className={`dot ${currentSlide === index ? "active" : ""}`}
+        onClick={() => setCurrentSlide(index)}
+      ></span>
+    ))}
+  </div>
+</section>
 
-        {/* Dots */}
-        <div className="hero-dots">
-          {heroImages.map((_, index) => (
-            <span
-              key={index}
-              className={`dot ${currentSlide === index ? "active" : ""}`}
-              onClick={() => setCurrentSlide(index)}
-            ></span>
-          ))}
-        </div>
-      </section>
+{/* Hero Section (Mobile) */}
+<section className="mobile-hero">
+  <img src={heroImages[currentSlide]} alt="Hero" className="hero-image-mobile" />
+  <div className="hero-overlay-mobile">
+    <Link to="/all-products" className="shop-now-btn-mobile">
+      Shop Now →
+    </Link>
+  </div>
+
+  {/* Mobile Arrows */}
+  <button className="hero-arrow-mobile left" onClick={prevSlide}>❮</button>
+  <button className="hero-arrow-mobile right" onClick={nextSlide}>❯</button>
+
+  {/* Mobile Dots */}
+  <div className="hero-dots-mobile">
+    {heroImages.map((_, index) => (
+      <span
+        key={index}
+        className={`dot ${currentSlide === index ? "active" : ""}`}
+        onClick={() => setCurrentSlide(index)}
+      ></span>
+    ))}
+  </div>
+</section>
+
 
       {/* Categories Section */}
       <section className="categories-section">
