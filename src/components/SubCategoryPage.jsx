@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import productsData from "./products";
 import ProductCard from "./ProductCard";
 import Navbar from "./Navbar";
-import "./SubCategoryPage.css"; // Import the CSS file
+import "./SubCategoryPage.css"; 
 
 const SubCategoryPage = ({ onAddToCart, onAddToWishlist }) => {
   const { category, subcategory } = useParams();

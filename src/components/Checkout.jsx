@@ -29,7 +29,7 @@ const Checkout = () => {
 
   const discountedPrice = totalPrice - 21;
 
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [timeLeft, setTimeLeft] = useState(5 * 60);
 
   // Countdown timer for QR
   useEffect(() => {

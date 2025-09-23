@@ -209,9 +209,7 @@ const Cart = () => {
                         +
                       </button>
                     </div>
-                    <button className="edit-btn" onClick={() => setEditItemId(item.id)}>
-                      Edit
-                    </button>
+                   
                     <button
                       className="remove-btn"
                       onClick={() => {
