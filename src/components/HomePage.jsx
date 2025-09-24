@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
-
+import axios from "axios";
 import './ProductCard.css';
 import "./HomePage.css";
 import Navbar from "./Navbar";
@@ -13,7 +13,6 @@ import Navbar from "./Navbar";
 import men_fashion from "../assets/men_fashion.jpeg";
 import women_fashion from "../assets/women_fashion.jpeg";
 import kid_fashion from "../assets/kids_fashion1.jpeg";
-import denim_jeans from "../assets/denim_jeans.jpeg";
 import heroImg1 from "../assets/hero1.jpg";
 import heroImg2 from "../assets/hero2.jpg";
 import heroImg3 from "../assets/hero3.jpg";
@@ -21,16 +20,27 @@ import heroImg3 from "../assets/hero3.jpg";
 function HomePage() {
   const { addToCart, addToWishlist } = useCart();
 
-  const featuredProducts = [
-    { id: 1, name: "Premium Denim Jeans", price: 1999, discountPercentage: 15, image: denim_jeans },
-    { id: 2, name: "Men's Casual Shirt", price: 1299, discountPercentage: 10, image: men_fashion },
-    { id: 3, name: "Women's Ethnic Dress", price: 2499, discountPercentage: 20, image: women_fashion },
-    { id: 4, name: "Kids' Party Wear Outfit", price: 1599, discountPercentage: 12, image: kid_fashion },
-    { id: 5, name: "Women's Casual Shirt", price: 1799, discountPercentage: 18, image: women_fashion },
-  ];
+  // ✅ Only keep the API-based state
+  const [featuredProducts, setFeaturedProducts] = useState([]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const heroImages = [heroImg1, heroImg2, heroImg3];
+
+  // ✅ Fetch featured products from backend
+ useEffect(() => {
+  const fetchFeatured = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/products/products");
+      // if res.data is already an array
+      const products = Array.isArray(res.data) ? res.data : res.data.products;
+      setFeaturedProducts(products.slice(0, 5)); // pick first 5
+    } catch (err) {
+      console.error("Failed to fetch featured products", err);
+    }
+  };
+  fetchFeatured();
+}, []);
+
 
   const nextSlide = useCallback(() => {
     setCurrentSlide(prev => (prev + 1) % heroImages.length);
@@ -40,12 +50,9 @@ function HomePage() {
     setCurrentSlide(prev => (prev === 0 ? heroImages.length - 1 : prev - 1));
   };
 
-  // Auto-slide every 5 seconds
+  // Auto-slide every 5s
   useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 2000);
-
+    const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
   }, [nextSlide]);
 
@@ -62,65 +69,57 @@ function HomePage() {
     <div className="app">
       <Navbar />
 
-   {/* Hero Section (Desktop) */}
-<section className="hero desktop-hero">
-  <img src={heroImages[currentSlide]} alt="Hero" className="hero-image" />
-  <div className="hero-overlay">
-    <div className="hero-center"></div>
-    <div className="hero-right">
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: [1, 1.1, 1], opacity: 1 }}
-        transition={{ duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatDelay: 3 }}
-      >
-        <Link to="/all-products" className="shop-now-btn">
-          Shop Now →
-        </Link>
-      </motion.div>
-    </div>
-  </div>
+      {/* Hero Section (Desktop) */}
+      <section className="hero desktop-hero">
+        <img src={heroImages[currentSlide]} alt="Hero" className="hero-image" />
+        <div className="hero-overlay">
+          <div className="hero-right">
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [1, 1.1, 1], opacity: 1 }}
+              transition={{ duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Link to="/all-products" className="shop-now-btn">
+                Shop Now →
+              </Link>
+            </motion.div>
+          </div>
+        </div>
 
-  {/* Arrows */}
-  <button className="hero-arrow left" onClick={prevSlide}>❮</button>
-  <button className="hero-arrow right" onClick={nextSlide}>❯</button>
+        <button className="hero-arrow left" onClick={prevSlide}>❮</button>
+        <button className="hero-arrow right" onClick={nextSlide}>❯</button>
 
-  {/* Dots */}
-  <div className="hero-dots">
-    {heroImages.map((_, index) => (
-      <span
-        key={index}
-        className={`dot ${currentSlide === index ? "active" : ""}`}
-        onClick={() => setCurrentSlide(index)}
-      ></span>
-    ))}
-  </div>
-</section>
+        <div className="hero-dots">
+          {heroImages.map((_, index) => (
+            <span
+              key={index}
+              className={`dot ${currentSlide === index ? "active" : ""}`}
+              onClick={() => setCurrentSlide(index)}
+            ></span>
+          ))}
+        </div>
+      </section>
 
-{/* Hero Section (Mobile) */}
-<section className="mobile-hero">
-  <img src={heroImages[currentSlide]} alt="Hero" className="hero-image-mobile" />
-  <div className="hero-overlay-mobile">
-    <Link to="/all-products" className="shop-now-btn-mobile">
-      Shop Now →
-    </Link>
-  </div>
-
-  {/* Mobile Arrows */}
-  <button className="hero-arrow-mobile left" onClick={prevSlide}>❮</button>
-  <button className="hero-arrow-mobile right" onClick={nextSlide}>❯</button>
-
-  {/* Mobile Dots */}
-  <div className="hero-dots-mobile">
-    {heroImages.map((_, index) => (
-      <span
-        key={index}
-        className={`dot ${currentSlide === index ? "active" : ""}`}
-        onClick={() => setCurrentSlide(index)}
-      ></span>
-    ))}
-  </div>
-</section>
-
+      {/* Hero Section (Mobile) */}
+      <section className="mobile-hero">
+        <img src={heroImages[currentSlide]} alt="Hero" className="hero-image-mobile" />
+        <div className="hero-overlay-mobile">
+          <Link to="/all-products" className="shop-now-btn-mobile">
+            Shop Now →
+          </Link>
+        </div>
+        <button className="hero-arrow-mobile left" onClick={prevSlide}>❮</button>
+        <button className="hero-arrow-mobile right" onClick={nextSlide}>❯</button>
+        <div className="hero-dots-mobile">
+          {heroImages.map((_, index) => (
+            <span
+              key={index}
+              className={`dot ${currentSlide === index ? "active" : ""}`}
+              onClick={() => setCurrentSlide(index)}
+            ></span>
+          ))}
+        </div>
+      </section>
 
       {/* Categories Section */}
       <section className="categories-section">
@@ -149,40 +148,35 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      
-      {/* Featured Products Section */}
-<section className="featured">
-  <h2 data-aos="fade-up">Featured Products</h2>
-  <div className="featured-products-list">
-    {featuredProducts.map((product, index) => (
-      <ProductCard
-      key={product.id}
-      product={product}
-      onAddToCart={addToCart}
-      onAddToWishlist={addToWishlist}
-      showAddToCart={false}
-      data-aos={index % 2 === 0 ? "fade-right" : "fade-left"}
-      data-aos-delay={index * 150}
-      data-aos-once="true"
-    />
-    ))}
-  </div>
-  <Link to="/all-products">
-    <button className="view-all" data-aos="fade-up" data-aos-delay={featuredProducts.length * 150}>
-      View All Products
-    </button>
-  </Link>
-</section>
-
-
+      {/* Featured Products */}
+      <section className="featured">
+        <h2 data-aos="fade-up">Featured Products</h2>
+        <div className="featured-products-list">
+          {featuredProducts.map((product, index) => (
+            <ProductCard
+              key={product._id} // ✅ use backend _id
+              product={product}
+              onAddToCart={addToCart}
+              onAddToWishlist={addToWishlist}
+              showAddToCart={false}
+              data-aos={index % 2 === 0 ? "fade-right" : "fade-left"}
+              data-aos-delay={index * 150}
+              data-aos-once="true"
+            />
+          ))}
+        </div>
+        <Link to="/all-products">
+          <button className="view-all" data-aos="fade-up" data-aos-delay={featuredProducts.length * 150}>
+            View All Products
+          </button>
+        </Link>
+      </section>
 
       {/* Newsletter */}
       <section className="newsletter" data-aos="fade-up">
-        <h2>Subscribe to  TenClothing</h2>
+        <h2>Subscribe to TenClothing</h2>
         <p>
-          Get the latest updates on new products, exclusive offers, and fashion
-          tips delivered straight to your inbox.
+          Get the latest updates on new products, exclusive offers, and fashion tips delivered straight to your inbox.
         </p>
         <div className="subscribe">
           <input type="email" placeholder="Your email address" />

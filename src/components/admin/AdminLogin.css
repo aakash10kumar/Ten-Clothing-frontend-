@@ -142,3 +142,20 @@
     gap: 8px;
   }
 }
+.password-toggle-wrapper {
+  position: relative;
+}
+
+.password-toggle-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* space for the icon */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1.2em;
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useCart } from "./CartContext";
 import products from "./products";
@@ -32,10 +33,8 @@ const ProductDetails = () => {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   // Reviews
-  const [reviews, setReviews] = useState(() => {
-    const saved = localStorage.getItem(`reviews-${id}`);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const isMongoId = /^[0-9a-fA-F]{24}$/.test(id || "");
+  const [reviews, setReviews] = useState([]);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [title, setTitle] = useState("");
@@ -46,8 +45,44 @@ const ProductDetails = () => {
 
   // ---------------- EFFECTS ----------------
   useEffect(() => {
-    localStorage.setItem(`reviews-${id}`, JSON.stringify(reviews));
-  }, [reviews, id]);
+    const loadReviews = async () => {
+      if (isMongoId) {
+        try {
+          const { data } = await axios.get(`http://localhost:5000/api/reviews/${id}`);
+          if (data?.success) {
+            setReviews(
+              (data.data || []).map((r) => ({
+                _id: r._id,
+                rating: r.rating,
+                title: r.title || "",
+                comment: r.comment || r.review || "",
+                photo: r.photo,
+                name: r.name || r.userId?.name || "Guest User",
+                verified: r.verified ?? true,
+                profilePic: r.profilePic || "/default-avatar.png",
+                date: new Date(r.createdAt).getTime(),
+              }))
+            );
+          } else {
+            setReviews([]);
+          }
+        } catch (e) {
+          setReviews([]);
+        }
+      } else {
+        const saved = localStorage.getItem(`reviews-${id}`);
+        setReviews(saved ? JSON.parse(saved) : []);
+      }
+    };
+    loadReviews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isMongoId]);
+
+  useEffect(() => {
+    if (!isMongoId) {
+      localStorage.setItem(`reviews-${id}`, JSON.stringify(reviews));
+    }
+  }, [reviews, id, isMongoId]);
 
   // ---------------- SAFE RETURN ----------------
   if (!product) {
@@ -91,7 +126,7 @@ const ProductDetails = () => {
       return 0;
     });
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!rating || !comment.trim()) {
       toast.error("Please provide both rating and comment");
       return;
@@ -106,12 +141,64 @@ const ProductDetails = () => {
       profilePic: "/default-avatar.png",
       date: Date.now(),
     };
-    setReviews([...reviews, newReview]);
+
+    if (isMongoId) {
+      try {
+        const { data } = await axios.post(
+          "http://localhost:5000/api/reviews/add",
+          {
+            productId: id,
+            rating,
+            title,
+            comment,
+            photo,
+            name: "Guest User",
+            verified: true,
+            profilePic: "/default-avatar.png",
+          }
+        );
+        if (data?.success) {
+          setReviews([
+            ...reviews,
+            {
+              _id: data.data?._id,
+              ...newReview,
+              date: new Date(data.data.createdAt).getTime(),
+            },
+          ]);
+          toast.success("Review submitted ✅", { autoClose: 1500 });
+        } else {
+          toast.error("Failed to submit review");
+        }
+      } catch (e) {
+        toast.error("Failed to submit review");
+      }
+    } else {
+      setReviews([...reviews, newReview]);
+      toast.success("Review submitted ✅", { autoClose: 1500 });
+    }
+
     setRating(0);
     setTitle("");
     setComment("");
     setPhoto(null);
-    toast.success("Review submitted ✅", { autoClose: 1500 });
+  };
+
+  const handleDeleteReview = async (review) => {
+    if (!window.confirm("Delete this review?")) return;
+    if (isMongoId && review?._id) {
+      try {
+        await axios.delete(`http://localhost:5000/api/reviews/${review._id}`);
+        setReviews((prev) => prev.filter((r) => r._id !== review._id));
+        toast.success("Review deleted");
+      } catch (e) {
+        toast.error("Failed to delete review");
+      }
+    } else {
+      // Local mode: remove by index/date match
+      setReviews((prev) => prev.filter((r) => r !== review));
+      toast.success("Review deleted");
+    }
   };
 
   // ---------------- CART ----------------
@@ -457,7 +544,7 @@ const ProductDetails = () => {
             alt={rev.name}
             className="profile-pic"
           />
-          <div className="review-meta">
+            <div className="review-meta">
             <div className="reviewer-name">{rev.name}</div>
             <div className="review-stars-time">
               <div className="stars">
@@ -484,9 +571,14 @@ const ProductDetails = () => {
           </div>
         )}
 
-        {rev.verified && (
-          <span className="verified">✔ Verified Purchase</span>
-        )}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {rev.verified && (
+            <span className="verified">✔ Verified Purchase</span>
+          )}
+          <button className="btn-small btn-delete" onClick={() => handleDeleteReview(rev)}>
+            Delete
+          </button>
+        </div>
       </div>
     ))
   )}

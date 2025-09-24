@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./AdminLogin.css"; // Reusing login styles
 
 function AdminRegister() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    number: "",
+    phone: "",
     password: "",
+    role: "isAdmin",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
@@ -24,17 +27,39 @@ function AdminRegister() {
     }));
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    console.log("Registered:", formData);
-    alert("Registered successfully (stub)!");
-    navigate("/admin");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/admin/register",
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          role: formData.role,
+        }
+      );
+
+      if (response.data.success) {
+        alert("Registration successful!");
+        navigate("/admin"); // Redirect to login
+      } else {
+        alert("Registration failed: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
     <div className="admin-login-container">
       <div className={`login-card ${showForm ? "animate-in" : ""}`}>
-        <button className="back-button" onClick={() => navigate(-1)}>← Back</button>
+        <button className="back-button" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
         <form className="admin-login-form" onSubmit={handleRegister}>
           <h2>📝 Register for TenClothing</h2>
 
@@ -54,27 +79,40 @@ function AdminRegister() {
             required
             value={formData.email}
             onChange={handleChange}
+            autoComplete="email"
           />
 
           <label>Phone Number</label>
           <input
             type="tel"
-            name="number"
+            name="phone"
             required
-            value={formData.number}
+            value={formData.phone}
             onChange={handleChange}
+            autoComplete="tel"
           />
 
           <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            required
-            value={formData.password}
-            onChange={handleChange}
-          />
+          <div className="password-toggle-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+              autoComplete="new-password"
+            />
+            <span
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
 
-          <button type="submit" className="btn-primary">Register</button>
+          <button type="submit" className="btn-primary">
+            Register
+          </button>
 
           <div className="extra-links" style={{ justifyContent: "center" }}>
             <span>Already have an account?</span>

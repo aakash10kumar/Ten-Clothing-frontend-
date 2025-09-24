@@ -1,73 +1,177 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
+const BASE_URL = "http://localhost:5000/"; // Change this to your backend URL or keep "" if using proxy
 
 function Products() {
-  const [Products, setProducts] = useState([
-    { id: 1, name: "Men's Kurta", category: "Men's", price: "₹1,199", stock: 50, description: "A traditional cotton kurta suitable for festive and casual wear.", gender: "Men", size: "M, L, XL", country: "India", image: "https://example.com/images/mens-kurta.jpg", fabric: "Cotton", colour: "White" },
-    { id: 2, name: "Women's Traditional Wear", category: "Women's", price: "₹2,499", stock: 30, description: "Elegant embroidered suit set perfect for weddings and festivals.", gender: "Women", size: "S, M, L", country: "India", image: "https://example.com/images/womens-traditional.jpg", fabric: "Silk Blend", colour: "Maroon" },
-    { id: 3, name: "Kids Jeans", category: "Kids", price: "₹799", stock: 40, description: "Comfortable and durable jeans for kids, ideal for daily wear.", gender: "Unisex", size: "4-5Y, 6-7Y, 8-9Y", country: "Bangladesh", image: "https://example.com/images/kids-jeans.jpg", fabric: "Denim", colour: "Blue" },
-    { id: 4, name: "Evening Gown", category: "Women's", price: "₹3,999", stock: 15, description: "Flowy floor-length evening gown with sequin detailing.", gender: "Women", size: "M, L", country: "India", image: "https://example.com/images/evening-gown.jpg", fabric: "Georgette", colour: "Navy Blue" },
-    { id: 5, name: "Printed T-Shirt", category: "Men's", price: "₹499", stock: 100, description: "Casual round-neck printed T-shirt for everyday wear.", gender: "Men", size: "M, L, XL", country: "India", image: "https://example.com/images/printed-tshirt.jpg", fabric: "Cotton", colour: "Black" },
-    { id: 6, name: "Women's Kurta Set", category: "Women's", price: "₹1499", stock: 50, description: "A stylish kurta set with matching pants and dupatta.", gender: "Women", size: "S, M, L, XL", country: "India", image: "https://example.com/images/womens-kurta-set.jpg", fabric: "Rayon", colour: "Teal Green" },
-    { id: 7, name: "Checks Shirts", category: "Men's", price: "₹599", stock: 30, description: "Full-sleeve checkered shirt for formal or casual wear.", gender: "Men", size: "M, L, XL", country: "India", image: "https://example.com/images/checks-shirt.jpg", fabric: "Cotton Blend", colour: "Red & Black" },
-    { id: 8, name: "Night Suits", category: "Kids", price: "₹499", stock: 60, description: "Soft cotton night suits designed for comfort and warmth.", gender: "Unisex", size: "3-4Y, 5-6Y, 7-8Y", country: "India", image: "https://example.com/images/kids-night-suit.jpg", fabric: "Cotton", colour: "Light Blue" },
-    { id: 9, name: "Kids Frocks", category: "Kids", price: "₹399", stock: 20, description: "Floral printed frocks perfect for parties and playtime.", gender: "Girls", size: "2-3Y, 4-5Y", country: "India", image: "https://example.com/images/kids-frock.jpg", fabric: "Cotton", colour: "Pink" },
-  ]);
+  const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
-  const [activeSection, setActiveSection] = useState("Products");
+  const [products, setProducts] = useState([]);
+  const [activeSection, setActiveSection] = useState("Products"); // Products, AddProduct, EditProduct
   const [selectedProduct, setSelectedProduct] = useState(null);
-
   const [productForm, setProductForm] = useState({
     name: "",
     category: "",
     price: "",
-    stock: "",
+    discount: "", // NEW discount field
+    netQuantity: "",
     description: "",
     gender: "",
-    size: "",
-    country: "",
-    image: "",
+    sizes: [],
+    countryOfOrigin: "",
+    images: [], // for multiple images
     fabric: "",
     colour: "",
   });
 
-  // Handlers
-  const handleDeleteProduct = (id) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const adminToken = localStorage.getItem("adminToken") || "";
+  console.log(adminToken);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/products/products"
+      );
+
+      const productList = Array.isArray(res.data.data) ? res.data.data : [];
+
+      setProducts(productList);
+    } catch (error) {
+      console.error("❌ Error fetching products:", error);
+      setProducts([]);
+    }
   };
 
-  const handleAddProduct = (e) => {
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
+
+    try {
+      await axios.delete(`${BASE_URL}api/products/products/${id}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      setProducts((prev) => prev.filter((p) => p._id !== id)); // use _id
+    } catch (error) {
+      console.error("Delete product failed:", error);
+    }
+  };
+
+  const toggleSize = (size) => {
+    if (productForm.sizes.includes(size)) {
+      setProductForm({
+        ...productForm,
+        sizes: productForm.sizes.filter((s) => s !== size),
+      });
+    } else {
+      setProductForm({
+        ...productForm,
+        sizes: [...productForm.sizes, size],
+      });
+    }
+  };
+
+  // Example: Add product
+  const handleAddProduct = async (e) => {
     e.preventDefault();
-    const newProduct = {
-      id: Products.length ? Math.max(...Products.map((p) => p.id)) + 1 : 1,
-      ...productForm,
-      stock: parseInt(productForm.stock),
-    };
-    setProducts((prev) => [...prev, newProduct]);
-    resetForm();
-    setActiveSection("Products");
+    try {
+      const formData = new FormData();
+
+      formData.append("name", productForm.name);
+      formData.append("category", productForm.category);
+      formData.append("price", productForm.price);
+      formData.append("discount", productForm.discount || 0);
+      formData.append("netQuantity", productForm.netQuantity);
+      formData.append("description", productForm.description);
+      formData.append("gender", productForm.gender);
+      formData.append("countryOfOrigin", productForm.countryOfOrigin);
+      formData.append("fabric", productForm.fabric);
+
+      // Append sizes
+      productForm.sizes.forEach((size) => formData.append("sizes", size));
+
+      // Append colours (split by comma if user entered multiple colors)
+      productForm.colour
+        .split(",")
+        .map((c) => c.trim())
+        .forEach((c) => formData.append("colour", c));
+
+      // Append images
+      productForm.images.forEach((img) => formData.append("images", img));
+
+      const adminToken = localStorage.getItem("adminToken");
+
+      const res = await axios.post(
+        "http://localhost:5000/api/products/createProduct",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+
+      console.log("✅ Product added:", res.data);
+      fetchProducts(); // refresh list
+      resetForm();
+      setActiveSection("Products");
+    } catch (error) {
+      console.error("Add product failed:", error.response?.data || error);
+      alert(error.response?.data?.message || "Failed to add product");
+    }
   };
 
-  const handleEditProductClick = (productId) => {
-    const product = Products.find((p) => p.id === productId);
+const handleEditProductClick = (id) => {
+    const product = products.find((p) => p._id === id);
     if (product) {
       setSelectedProduct(product);
-      setProductForm({ ...product });
+      setProductForm({
+        ...product,
+        sizes: product.sizes || [],
+        images: [],
+        discount: product.discount || "",
+      });
       setActiveSection("EditProduct");
     }
   };
 
-  const submitEditedProduct = (e) => {
+  const submitEditedProduct = async (e) => {
     e.preventDefault();
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === selectedProduct.id
-          ? { ...p, ...productForm, stock: parseInt(productForm.stock) }
-          : p
-      )
-    );
-    resetForm();
-    setActiveSection("Products");
+    try {
+      const formData = new FormData();
+      Object.entries(productForm).forEach(([key, value]) => {
+        if (key === "sizes" || key === "colour") {
+          value.forEach((v) => formData.append(key, v));
+        } else if (key === "images") {
+          value.forEach((file) => formData.append("images", file));
+        } else {
+          formData.append(key, value);
+        }
+      });
+
+      const res = await axios.put(
+        `${BASE_URL}api/products/updateProduct/${selectedProduct._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+
+      setProducts((prev) =>
+        prev.map((p) => (p._id === selectedProduct._id ? res.data.data : p))
+      );
+      resetForm();
+      setActiveSection("Products");
+    } catch (error) {
+      console.error("Update product failed:", error.response?.data || error);
+      alert(error.response?.data?.message || "Failed to update product");
+    }
   };
 
   const resetForm = () => {
@@ -76,64 +180,173 @@ function Products() {
       name: "",
       category: "",
       price: "",
-      stock: "",
+      discount: "",
+      netQuantity: "",
       description: "",
       gender: "",
-      size: "",
-      country: "",
-      image: "",
+      sizes: [],
+      countryOfOrigin: "",
+      images: [],
       fabric: "",
       colour: "",
     });
   };
 
-  // Renders
   if (activeSection === "AddProduct") {
     return (
       <section>
         <h2>Add New Product</h2>
         <form className="settings-form" onSubmit={handleAddProduct}>
           <label>Product Name</label>
-          <input type="text" value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.name}
+            onChange={(e) =>
+              setProductForm({ ...productForm, name: e.target.value })
+            }
+            required
+          />
 
           <label>Category</label>
-          <input type="text" value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.category}
+            onChange={(e) =>
+              setProductForm({ ...productForm, category: e.target.value })
+            }
+            required
+          />
 
           <label>Price</label>
-          <input type="text" value={productForm.price} onChange={(e) => setProductForm({ ...productForm, price: e.target.value })} required />
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={productForm.price}
+            onChange={(e) =>
+              setProductForm({ ...productForm, price: e.target.value })
+            }
+            required
+          />
 
-          <label>Stock</label>
-          <input type="number" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })} required />
+          <label>Discount (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value={productForm.discount}
+            onChange={(e) =>
+              setProductForm({ ...productForm, discount: e.target.value })
+            }
+            placeholder="0"
+          />
+
+          <label>Net Quantity</label>
+          <input
+            type="number"
+            min="0"
+            value={productForm.netQuantity}
+            onChange={(e) =>
+              setProductForm({ ...productForm, netQuantity: e.target.value })
+            }
+            required
+          />
 
           <label>Description</label>
-          <textarea value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} required />
+          <textarea
+            value={productForm.description}
+            onChange={(e) =>
+              setProductForm({ ...productForm, description: e.target.value })
+            }
+            required
+          />
 
           <label>Gender</label>
-          <select value={productForm.gender} onChange={(e) => setProductForm({ ...productForm, gender: e.target.value })} required>
+          <select
+            value={productForm.gender}
+            onChange={(e) =>
+              setProductForm({ ...productForm, gender: e.target.value })
+            }
+            required
+          >
             <option value="">Select</option>
-            <option value="Men">Men</option>
-            <option value="Women">Women</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
             <option value="Kids">Kids</option>
-            <option value="Unisex">Unisex</option>
           </select>
 
           <label>Size</label>
-          <input type="text" value={productForm.size} onChange={(e) => setProductForm({ ...productForm, size: e.target.value })} required />
+          <div>
+            {availableSizes.map((size) => (
+              <label key={size} style={{ marginRight: "10px" }}>
+                <input
+                  type="checkbox"
+                  value={size}
+                  checked={productForm.sizes.includes(size)}
+                  onChange={() => toggleSize(size)}
+                />
+                {size}
+              </label>
+            ))}
+          </div>
 
-          <label>Country</label>
-          <input type="text" value={productForm.country} onChange={(e) => setProductForm({ ...productForm, country: e.target.value })} required />
+          <label>Country of Origin</label>
+          <input
+            type="text"
+            value={productForm.countryOfOrigin}
+            onChange={(e) =>
+              setProductForm({
+                ...productForm,
+                countryOfOrigin: e.target.value,
+              })
+            }
+            required
+          />
 
-          <label>Image URL</label>
-          <input type="text" value={productForm.image} onChange={(e) => setProductForm({ ...productForm, image: e.target.value })} required />
+          <label>Images</label>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={(e) => {
+              setProductForm({
+                ...productForm,
+                images: Array.from(e.target.files),
+              });
+            }}
+          />
 
           <label>Fabric</label>
-          <input type="text" value={productForm.fabric} onChange={(e) => setProductForm({ ...productForm, fabric: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.fabric}
+            onChange={(e) =>
+              setProductForm({ ...productForm, fabric: e.target.value })
+            }
+            required
+          />
 
           <label>Colour</label>
-          <input type="text" value={productForm.colour} onChange={(e) => setProductForm({ ...productForm, colour: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.colour}
+            onChange={(e) =>
+              setProductForm({ ...productForm, colour: e.target.value })
+            }
+            required
+          />
 
-          <button className="btn-primary" type="submit">Add Product</button>
-          <button className="btn-small btn-cancel" type="button" onClick={() => setActiveSection("Products")}>Cancel</button>
+          <button className="btn-primary" type="submit">
+            Add Product
+          </button>
+          <button
+            className="btn-small btn-cancel"
+            type="button"
+            onClick={() => setActiveSection("Products")}
+          >
+            Cancel
+          </button>
         </form>
       </section>
     );
@@ -145,40 +358,155 @@ function Products() {
         <h2>Edit Product – {selectedProduct.name}</h2>
         <form className="settings-form" onSubmit={submitEditedProduct}>
           <label>Product Name</label>
-          <input type="text" value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.name}
+            onChange={(e) =>
+              setProductForm({ ...productForm, name: e.target.value })
+            }
+            required
+          />
 
           <label>Category</label>
-          <input type="text" value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.category}
+            onChange={(e) =>
+              setProductForm({ ...productForm, category: e.target.value })
+            }
+            required
+          />
 
           <label>Price</label>
-          <input type="text" value={productForm.price} onChange={(e) => setProductForm({ ...productForm, price: e.target.value })} required />
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={productForm.price}
+            onChange={(e) =>
+              setProductForm({ ...productForm, price: e.target.value })
+            }
+            required
+          />
 
-          <label>Stock</label>
-          <input type="number" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })} required />
+          <label>Discount (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value={productForm.discount}
+            onChange={(e) =>
+              setProductForm({ ...productForm, discount: e.target.value })
+            }
+            placeholder="0"
+          />
+
+          <label>Net Quantity</label>
+          <input
+            type="number"
+            min="0"
+            value={productForm.netQuantity}
+            onChange={(e) =>
+              setProductForm({ ...productForm, netQuantity: e.target.value })
+            }
+            required
+          />
 
           <label>Description</label>
-          <input type="text" value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} required />
+          <textarea
+            value={productForm.description}
+            onChange={(e) =>
+              setProductForm({ ...productForm, description: e.target.value })
+            }
+            required
+          />
 
           <label>Gender</label>
-          <input type="text" value={productForm.gender} onChange={(e) => setProductForm({ ...productForm, gender: e.target.value })} required />
+          <select
+            value={productForm.gender}
+            onChange={(e) =>
+              setProductForm({ ...productForm, gender: e.target.value })
+            }
+            required
+          >
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Kids">Kids</option>
+          </select>
 
-          <label>Size</label>
-          <input type="text" value={productForm.size} onChange={(e) => setProductForm({ ...productForm, size: e.target.value })} required />
+          <label>Sizes</label>
+          <div>
+            {availableSizes.map((sizes) => (
+              <label key={sizes} style={{ marginRight: "10px" }}>
+                <input
+                  type="checkbox"
+                  value={sizes}
+                  checked={productForm.sizes.includes(sizes)}
+                  onChange={() => toggleSize(sizes)}
+                />
+                {sizes}
+              </label>
+            ))}
+          </div>
 
-          <label>Country</label>
-          <input type="text" value={productForm.country} onChange={(e) => setProductForm({ ...productForm, country: e.target.value })} required />
+          <label>Country of Origin</label>
+          <input
+            type="text"
+            value={productForm.countryOfOrigin}
+            onChange={(e) =>
+              setProductForm({
+                ...productForm,
+                countryOfOrigin: e.target.value,
+              })
+            }
+            required
+          />
 
-          <label>Image URL</label>
-          <input type="text" value={productForm.image} onChange={(e) => setProductForm({ ...productForm, image: e.target.value })} required />
+          <label>Images (Add new)</label>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={(e) => {
+              setProductForm({
+                ...productForm,
+                images: Array.from(e.target.files),
+              });
+            }}
+          />
 
           <label>Fabric</label>
-          <input type="text" value={productForm.fabric} onChange={(e) => setProductForm({ ...productForm, fabric: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.fabric}
+            onChange={(e) =>
+              setProductForm({ ...productForm, fabric: e.target.value })
+            }
+            required
+          />
 
           <label>Colour</label>
-          <input type="text" value={productForm.colour} onChange={(e) => setProductForm({ ...productForm, colour: e.target.value })} required />
+          <input
+            type="text"
+            value={productForm.colour}
+            onChange={(e) =>
+              setProductForm({ ...productForm, colour: e.target.value })
+            }
+            required
+          />
 
-          <button className="btn-primary" type="submit">Save Changes</button>
-          <button className="btn-small btn-cancel" type="button" onClick={() => setActiveSection("Products")}>Cancel</button>
+          <button className="btn-primary" type="submit">
+            Save Changes
+          </button>
+          <button
+            className="btn-small btn-cancel"
+            type="button"
+            onClick={() => setActiveSection("Products")}
+          >
+            Cancel
+          </button>
         </form>
       </section>
     );
@@ -191,29 +519,83 @@ function Products() {
       <table className="data-table">
         <thead>
           <tr>
-            <th>Product Name</th><th>Category</th><th>Price</th><th>Stock</th>
-            <th>Description</th><th>Gender</th><th>Size</th><th>Country</th>
-            <th>Image</th><th>Fabric</th><th>Colour</th><th>Actions</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Discount (%)</th>
+            <th>Net Quantity</th>
+            <th>Description</th>
+            <th>Gender</th>
+            <th>Sizes</th>
+            <th>Country of Origin</th>
+            <th>Image</th>
+            <th>Fabric</th>
+            <th>Colour</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {Products.map((p) => (
-            <tr key={p.id}>
-              <td>{p.name}</td><td>{p.category}</td><td>{p.price}</td><td>{p.stock}</td>
-              <td>{p.description}</td><td>{p.gender}</td><td>{p.size}</td><td>{p.country}</td>
-              <td><img src={p.image} alt={p.name} width="50" /></td>
-              <td>{p.fabric}</td><td>{p.colour}</td>
-              <td>
-                <div className="action-buttons">
-                  <button className="btn-small" onClick={() => handleEditProductClick(p.id)}>Edit</button>
-                  <button className="btn-small btn-delete" onClick={() => handleDeleteProduct(p.id)}>Delete</button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {Array.isArray(products) &&
+            products.map((p) => (
+              <tr key={p._id}>
+                <td>{p.name}</td>
+                <td>{p.category}</td>
+                <td>{p.price}</td>
+                <td>{p.discount || 0}</td>
+                <td>{p.netQuantity}</td>
+                <td>{p.description}</td>
+                <td>{p.gender}</td>
+                <td>{p.sizes.join(", ")}</td>
+                <td>{p.countryOfOrigin}</td>
+                <td>
+                  {p.images && p.images.length > 0 ? (
+                    <div style={{ display: "flex", gap: "5px" }}>
+                      {p.images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={`http://localhost:5000/uploads/${img}`} // use `uploads/` if needed
+                          alt={`${p.name} ${idx + 1}`}
+                          width="50"
+                          height="50"
+                          style={{ objectFit: "cover", borderRadius: "4px" }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    "No Image"
+                  )}
+                </td>
+                <td>{p.fabric}</td>
+                <td>{p.colour}</td>
+                <td>
+                  <div className="action-buttons">
+                    <button
+                      className="btn-small"
+                      onClick={() => handleEditProductClick(p._id)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn-small btn-delete"
+                      onClick={() => handleDeleteProduct(p._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
-      <button className="btn-primary" onClick={() => { resetForm(); setActiveSection("AddProduct"); }}>Add New Product</button>
+      <button
+        className="btn-primary"
+        onClick={() => {
+          resetForm();
+          setActiveSection("AddProduct");
+        }}
+      >
+        Add New Product
+      </button>
     </section>
   );
 }
