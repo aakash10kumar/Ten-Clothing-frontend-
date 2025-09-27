@@ -1,100 +1,70 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useCart } from "./CartContext";
-import products from "./products";
-import "./ProductDetails.css";
 import Navbar from "./Navbar";
+import axios from "axios";
 import empty_cart from "../assets/empty_cart.jpeg";
-
-// Toastify
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-// Font Awesome (needed for star icons)
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
-
+import "./ProductDetails.css";
 
 const ProductDetails = () => {
-   const navigate = useNavigate();
+  const getImageUrl = (path) =>
+    path?.startsWith("http") ? path : `http://localhost:5000/uploads/${path}`;
   const { id } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
-
   const reviewsRef = useRef(null);
 
-  // Find product
-  const product = products.find((item) => item.id.toString() === id);
-
-  // ---------------- STATES ----------------
-  const [selectedImage, setSelectedImage] = useState(product?.image || "");
+  const [product, setProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Reviews
-  const isMongoId = /^[0-9a-fA-F]{24}$/.test(id || "");
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState(() => {
+    const saved = localStorage.getItem(`reviews-${id}`);
+    return saved ? JSON.parse(saved) : [];
+  });
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
   const [title, setTitle] = useState("");
+  const [comment, setComment] = useState("");
   const [photo, setPhoto] = useState(null);
 
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("recent");
 
-  // ---------------- EFFECTS ----------------
+  // Fetch product
   useEffect(() => {
-    const loadReviews = async () => {
-      if (isMongoId) {
-        try {
-          const { data } = await axios.get(`http://localhost:5000/api/reviews/${id}`);
-          if (data?.success) {
-            setReviews(
-              (data.data || []).map((r) => ({
-                _id: r._id,
-                rating: r.rating,
-                title: r.title || "",
-                comment: r.comment || r.review || "",
-                photo: r.photo,
-                name: r.name || r.userId?.name || "Guest User",
-                verified: r.verified ?? true,
-                profilePic: r.profilePic || "/default-avatar.png",
-                date: new Date(r.createdAt).getTime(),
-              }))
-            );
-          } else {
-            setReviews([]);
-          }
-        } catch (e) {
-          setReviews([]);
-        }
-      } else {
-        const saved = localStorage.getItem(`reviews-${id}`);
-        setReviews(saved ? JSON.parse(saved) : []);
+    const fetchProduct = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/products/products/${id}`
+        );
+        console.log("Fetched product:", res.data);
+        setProduct(res.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to load product.");
+        setLoading(false);
       }
     };
-    loadReviews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, isMongoId]);
+    fetchProduct();
+  }, [id]);
 
   useEffect(() => {
-    if (!isMongoId) {
-      localStorage.setItem(`reviews-${id}`, JSON.stringify(reviews));
+    if (product && product.images && product.images.length > 0) {
+      setSelectedImage(product.images[0]);
     }
-  }, [reviews, id, isMongoId]);
+  }, [product]);
 
-  // ---------------- SAFE RETURN ----------------
-  if (!product) {
-    return (
-      <div className="product-not-found">
-        <h2>Product not found</h2>
-        <Link to="/">Back to Products</Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    localStorage.setItem(`reviews-${id}`, JSON.stringify(reviews));
+  }, [reviews, id]);
 
-  // ---------------- HELPERS ----------------
   const averageRating =
     reviews.length > 0
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
@@ -126,12 +96,14 @@ const ProductDetails = () => {
       return 0;
     });
 
-  const handleSubmitReview = async () => {
-    if (!rating || !comment.trim()) {
-      toast.error("Please provide both rating and comment");
+  const handleSubmitReview = () => {
+    if (!rating || !comment.trim() || !title.trim()) {
+      toast.error("Please fill out all review fields");
       return;
     }
+
     const newReview = {
+      id: Date.now(),
       rating,
       title,
       comment,
@@ -141,78 +113,27 @@ const ProductDetails = () => {
       profilePic: "/default-avatar.png",
       date: Date.now(),
     };
-
-    if (isMongoId) {
-      try {
-        const { data } = await axios.post(
-          "http://localhost:5000/api/reviews/add",
-          {
-            productId: id,
-            rating,
-            title,
-            comment,
-            photo,
-            name: "Guest User",
-            verified: true,
-            profilePic: "/default-avatar.png",
-          }
-        );
-        if (data?.success) {
-          setReviews([
-            ...reviews,
-            {
-              _id: data.data?._id,
-              ...newReview,
-              date: new Date(data.data.createdAt).getTime(),
-            },
-          ]);
-          toast.success("Review submitted ✅", { autoClose: 1500 });
-        } else {
-          toast.error("Failed to submit review");
-        }
-      } catch (e) {
-        toast.error("Failed to submit review");
-      }
-    } else {
-      setReviews([...reviews, newReview]);
-      toast.success("Review submitted ✅", { autoClose: 1500 });
-    }
-
+    setReviews([...reviews, newReview]);
     setRating(0);
     setTitle("");
     setComment("");
     setPhoto(null);
+    toast.success("Review submitted ✅", { autoClose: 1500 });
   };
 
-  const handleDeleteReview = async (review) => {
-    if (!window.confirm("Delete this review?")) return;
-    if (isMongoId && review?._id) {
-      try {
-        await axios.delete(`http://localhost:5000/api/reviews/${review._id}`);
-        setReviews((prev) => prev.filter((r) => r._id !== review._id));
-        toast.success("Review deleted");
-      } catch (e) {
-        toast.error("Failed to delete review");
-      }
-    } else {
-      // Local mode: remove by index/date match
-      setReviews((prev) => prev.filter((r) => r !== review));
-      toast.success("Review deleted");
-    }
-  };
-
-  // ---------------- CART ----------------
   const handleAddToCart = () => {
     if (product.sizes?.length > 0 && !selectedSize) {
       toast.error("Please select a size before adding to cart");
       return;
     }
+
     const productWithOptions = {
       ...product,
       size: selectedSize || "M",
       color: selectedColor || product.colors?.[0]?.name || "Default",
       image: selectedImage || product.image,
     };
+
     addToCart(productWithOptions);
     toast.success(`${product.name} added to cart 🛒`, { autoClose: 1500 });
     navigate("/cart");
@@ -222,25 +143,67 @@ const ProductDetails = () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (!isLoggedIn) {
       setShowLoginPrompt(true);
-      toast.warning("⚠️ Please log in to continue checkout", { autoClose: 2000 });
+      toast.warning("⚠️ Please log in to continue checkout", {
+        autoClose: 2000,
+      });
       return;
     }
+
     if (product.sizes?.length > 0 && !selectedSize) {
       toast.error("Please select a size before checkout");
       return;
     }
+
     const productWithOptions = {
       ...product,
       size: selectedSize || "M",
       color: selectedColor || product.colors?.[0]?.name || "Default",
       image: selectedImage || product.image,
     };
+
     addToCart(productWithOptions);
     toast.success(`Proceeding to checkout with ${product.name} ✅`, {
       autoClose: 1500,
     });
     navigate("/checkout");
   };
+
+  // ---------------- RENDER STATES ----------------
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="loading-state">
+          <h2>Loading product details...</h2>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <div className="error-state">
+          <h2>{error}</h2>
+          <Link to="/">Back to Products</Link>
+        </div>
+      </>
+    );
+  }
+
+  if (!product) {
+    return (
+      <>
+        <Navbar />
+        <div className="product-not-found">
+          <h2>Product not found</h2>
+          <Link to="/">Back to Products</Link>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -252,7 +215,11 @@ const ProductDetails = () => {
           <div className="login-required">
             <h2 className="login-title">PLEASE LOG IN</h2>
             <p className="login-subtitle">Login to continue your purchase.</p>
-            <img src={empty_cart} alt="Login Required" className="empty-image" />
+            <img
+              src={empty_cart}
+              alt="Login Required"
+              className="empty-image"
+            />
             <button className="login-btn" onClick={() => navigate("/login")}>
               LOGIN
             </button>
@@ -264,126 +231,152 @@ const ProductDetails = () => {
         <>
           <div className="product-details">
             {/* LEFT - Image Gallery */}
-            <div className="image-gallery">
-              <div className="thumbnails">
-                {product.variants && product.variants.length > 0 ? (
-                  product.variants.map((variant, index) => (
-                    <img
-                      key={index}
-                      src={variant}
-                      alt="variant"
-                      className={`${selectedImage === variant ? "active" : ""}`}
-                      onClick={() => setSelectedImage(variant)}
-                    />
-                  ))
-                ) : (
-                  <img src={product.image} alt={product.name} className="active" />
-                )}
-              </div>
-              <div className="main-image">
-                <img src={selectedImage || product.image} alt={product.name} />
-              </div>
-            </div>
+           <div className="image-gallery">
+  <div className="thumbnails">
+    {product.images && product.images.length > 0 ? (
+      product.images.map((img, index) => (
+        <img
+          key={index}
+          src={getImageUrl(img)}
+          alt={`product-${index}`}
+          className={selectedImage === img ? "active" : ""}
+          onClick={() => setSelectedImage(img)}
+        />
+      ))
+    ) : (
+      <img src="/default-image.png" alt="default" />
+    )}
+  </div>
+
+  <div className="main-image">
+    <img
+      src={
+        selectedImage
+          ? getImageUrl(selectedImage)
+          : product.images && product.images.length > 0
+          ? getImageUrl(product.images[0])
+          : "/default-image.png"
+      }
+      alt="Selected"
+    />
+  </div>
+
+  {/* ---------------- Selected Color Preview ---------------- */}
+  {selectedColor && product.colors?.length > 0 && (
+    <div className="selected-color-preview">
+      <span>Selected Color:</span>
+      <div
+        className="color-circle-preview"
+        style={{
+          backgroundColor:
+            product.colors.find((c) => c.name === selectedColor)?.code || "#ccc",
+        }}
+      ></div>
+      <span className="color-name">{selectedColor}</span>
+    </div>
+  )}
+</div>
+
 
             {/* RIGHT - Product Info */}
-            <div className="product-info">
-              <h1 className="product-title">{product.name}</h1>
-              <p className="brand">Brand: {product.brand || "No brand"}</p>
+          {/* RIGHT - Product Info */}
+<div className="product-info">
+  <h1 className="product-title">{product.name}</h1>
 
-              {/* Rating */}
-              <div
-                className="rating-summary-badge"
-                onClick={scrollToReviews}
-              >
-                <span className="avg-rating">
-                  {reviews.length > 0
-                    ? averageRating.toFixed(1)
-                    : product.rating || "3.5"}{" "}
-                  ⭐
-                </span>
-                <span className="total-reviews">
-                  ({reviews.length > 0 ? reviews.length : product.reviews || "1000+"})
-                </span>
-              </div>
+  {/* Rating Summary */}
+  <div className="rating-summary-badge" onClick={scrollToReviews}>
+    <span className="avg-rating">
+      {reviews.length > 0
+        ? averageRating.toFixed(1)
+        : product.rating || "3.5"}{" "}
+      ⭐
+    </span>
+    <span className="total-reviews">
+      ({reviews.length > 0 ? reviews.length : product.reviews || "1000+"})
+    </span>
+  </div>
 
-              {/* Price Section */}
-              <div className="price-section">
-                <span className="price">
-                  ₹
-                  {Math.round(
-                    product.price - (product.price * product.discountPercentage) / 100
-                  )}
-                </span>
-                <span className="old-price">₹{product.price}</span>
-                <span className="discount">-{product.discountPercentage}%</span>
-              </div>
+  {/* Price Section */}
+  <div className="price-section">
+    <span className="price">
+      ₹
+      {Math.round(
+        product.price - (product.price * product.discountPercentage) / 100
+      )}
+    </span>
+    <span className="old-price">₹{product.price}</span>
+    <span className="discount">-{product.discountPercentage}%</span>
+  </div>
 
-              {/* Extra Info Pills */}
-              <div className="extra-info">
-                <div className="info-item">🔄 10 Days Return & Exchange</div>
-                <div className="info-item">💵 Cash on Delivery Available</div>
-                <div className="info-item">🚚 Free Delivery</div>
-                <div className="info-item">🏷️ Top Brand</div>
-                <div className="info-item">✅ Secure Transaction</div>
-              </div>
+  {/* Extra Info Pills */}
+  <div className="extra-info">
+    <div className="info-item">🔄 10 Days Return & Exchange</div>
+    <div className="info-item">💵 Cash on Delivery Available</div>
+    <div className="info-item">🚚 Free Delivery</div>
+    <div className="info-item">🏷️ Top Brand</div>
+    <div className="info-item">✅ Secure Transaction</div>
+  </div>
 
-              {/* Colors */}
-              {product.colors && product.colors.length > 0 && (
-                <div className="colors">
-                  <span className="option-title">Available Colors:</span>
-                  <div className="color-options">
-                    {product.colors.map((colorVariant, index) => {
-                      const colorCode = colorVariant.code || "";
-                      const isWhite =
-                        colorCode.toLowerCase() === "#ffffff" ||
-                        colorCode.toLowerCase() === "white";
+  {/* Colors */}
+  {product.colors?.length > 0 && (
+    <div className="colors">
+      <span className="option-title">Available Colors:</span>
+      <div className="color-options">
+        {product.colors.map((colorVariant, index) => {
+          const colorCode = colorVariant.code || "";
+          const isWhite =
+            colorCode.toLowerCase() === "#ffffff" || colorCode.toLowerCase() === "white";
 
-                      return (
-                        <div
-                          key={index}
-                          className={`color-circle ${
-                            selectedColor === colorVariant.name ? "active" : ""
-                          } ${isWhite ? "white-border" : ""}`}
-                          style={{ backgroundColor: colorCode }}
-                          onClick={() => {
-                            setSelectedImage(colorVariant.image);
-                            setSelectedColor(colorVariant.name);
-                          }}
-                        ></div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+          return (
+            <div
+              key={`${colorVariant.name}-${index}`}
+              className={`color-circle ${selectedColor === colorVariant.name ? "active" : ""} ${isWhite ? "white-border" : ""}`}
+              style={{ backgroundColor: colorCode }}
+              onClick={() => {
+                const colorImage = colorVariant.image?.startsWith("http")
+                  ? colorVariant.image
+                  : colorVariant.image
+                  ? `http://localhost:5000/${colorVariant.image}`
+                  : empty_cart;
+                setSelectedImage(colorImage);
+                setSelectedColor(colorVariant.name);
+              }}
+            ></div>
+          );
+        })}
+      </div>
+    </div>
+  )}
 
-              {/* Sizes */}
-              {product.sizes && product.sizes.length > 0 && (
-                <div className="sizes">
-                  <span className="option-title">Available Sizes:</span>
-                  <div className="size-options">
-                    {product.sizes.map((size, index) => (
-                      <div
-                        key={index}
-                        className={`size-box ${selectedSize === size ? "active" : ""}`}
-                        onClick={() => setSelectedSize(size)}
-                      >
-                        {size}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+  {/* Sizes */}
+  {product.sizes?.length > 0 && (
+    <div className="sizes">
+      <span className="option-title">Available Sizes:</span>
+      <div className="size-options">
+        {product.sizes.map((size, index) => (
+          <div
+            key={index}
+            className={`size-box ${selectedSize === size ? "active" : ""}`}
+            onClick={() => setSelectedSize(size)}
+          >
+            {size}
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
 
-              {/* Buttons */}
-              <div className="actions">
-                <button className="add-to-cart" onClick={handleAddToCart}>
-                  Add to Cart
-                </button>
-                <button className="buy-now" onClick={handleBuyNow}>
-                  Buy Now
-                </button>
-              </div>
-            </div>
+  {/* Buttons */}
+  <div className="actions">
+    <button className="add-to-cart" onClick={handleAddToCart}>
+      Add to Cart
+    </button>
+    <button className="buy-now" onClick={handleBuyNow}>
+      Buy Now
+    </button>
+  </div>
+</div>
+
           </div>
 
           {/* EXTRA SECTION */}
@@ -400,6 +393,7 @@ const ProductDetails = () => {
                   <tr>
                     <td>Gender:</td>
                     <td>{product.gender}</td>
+                    <td>{product.color}</td>
                   </tr>
                   <tr>
                     <td>Fabric:</td>
@@ -427,13 +421,17 @@ const ProductDetails = () => {
                 <div className="icon blue">👕</div>
                 <h4>Premium Quality</h4>
                 <p>
-                  Made from high-quality {product.fabric} fabric for comfort and durability.
+                  Made from high-quality {product.fabric} fabric for comfort and
+                  durability.
                 </p>
               </div>
               <div className="feature">
                 <div className="icon green">📏</div>
                 <h4>Perfect Fit</h4>
-                <p>Slim-fit design tailored for professional appearance and comfort.</p>
+                <p>
+                  Slim-fit design tailored for professional appearance and
+                  comfort.
+                </p>
               </div>
               <div className="feature">
                 <div className="icon purple">🏅</div>
@@ -472,7 +470,10 @@ const ProductDetails = () => {
                     <div key={star} className="rating-bar">
                       <span>{star} ★</span>
                       <div className="bar">
-                        <div className="fill" style={{ width: `${percent}%` }}></div>
+                        <div
+                          className="fill"
+                          style={{ width: `${percent}%` }}
+                        ></div>
                       </div>
                       <span>{count}</span>
                     </div>
@@ -501,13 +502,17 @@ const ProductDetails = () => {
 
             {/* Write Review */}
             <div className="review-form">
-                <h3> Write a Review</h3>
-              <label><h4>Your Rating</h4></label>
+              <h3> Write a Review</h3>
+              <label>
+                <h4>Your Rating</h4>
+              </label>
               <div className="stars">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <i
                     key={star}
-                    className={`fa-star ${star <= rating ? "fas selected" : "far"}`}
+                    className={`fa-star ${
+                      star <= rating ? "fas selected" : "far"
+                    }`}
                     onClick={() => setRating(star)}
                   ></i>
                 ))}
@@ -526,64 +531,67 @@ const ProductDetails = () => {
                 onChange={(e) => setComment(e.target.value)}
               />
 
-              <input type="file" accept="image/*" onChange={handlePhotoUpload} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+              />
 
               <button onClick={handleSubmitReview}>Submit Review</button>
             </div>
 
             {/* Reviews Grid */}
-<div className="review-list">
-  {filteredReviews.length === 0 ? (
-    <p>No reviews yet. Be the first!</p>
-  ) : (
-    filteredReviews.map((rev, index) => (
-      <div key={index} className="review-card">
-        <div className="review-header">
-          <img
-            src={rev.profilePic || "/default-avatar.png"}
-            alt={rev.name}
-            className="profile-pic"
-          />
-            <div className="review-meta">
-            <div className="reviewer-name">{rev.name}</div>
-            <div className="review-stars-time">
-              <div className="stars">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <i
-                    key={star}
-                    className={`fa-star ${star <= rev.rating ? "fas" : "far"}`}
-                  ></i>
-                ))}
-              </div>
-              <span className="time">
-                {rev.date ? new Date(rev.date).toLocaleDateString() : "recently"}
-              </span>
+            <div className="review-list">
+              {filteredReviews.length === 0 ? (
+                <p>No reviews yet. Be the first!</p>
+              ) : (
+                filteredReviews.map((rev, index) => (
+                  <div key={index} className="review-card">
+                    <div className="review-header">
+                      <img
+                        src={rev.profilePic || "/default-avatar.png"}
+                        alt={rev.name}
+                        className="profile-pic"
+                      />
+                      <div className="review-meta">
+                        <div className="reviewer-name">{rev.name}</div>
+                        <div className="review-stars-time">
+                          <div className="stars">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <i
+                                key={star}
+                                className={`fa-star ${
+                                  star <= rev.rating ? "fas" : "far"
+                                }`}
+                              ></i>
+                            ))}
+                          </div>
+                          <span className="time">
+                            {rev.date
+                              ? new Date(rev.date).toLocaleDateString()
+                              : "recently"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h4 className="review-title">{rev.title}</h4>
+                    <p className="review-text">{rev.comment}</p>
+
+                    {rev.photo && (
+                      <div className="review-photos">
+                        <img src={rev.photo} alt="review" />
+                      </div>
+                    )}
+
+                    {rev.verified && (
+                      <span className="verified">✔ Verified Purchase</span>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
-        </div>
-
-        <h4 className="review-title">{rev.title}</h4>
-        <p className="review-text">{rev.comment}</p>
-
-        {rev.photo && (
-          <div className="review-photos">
-            <img src={rev.photo} alt="review" />
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {rev.verified && (
-            <span className="verified">✔ Verified Purchase</span>
-          )}
-          <button className="btn-small btn-delete" onClick={() => handleDeleteReview(rev)}>
-            Delete
-          </button>
-        </div>
-      </div>
-    ))
-  )}
- </div>
-   </div>
         </>
       )}
     </>

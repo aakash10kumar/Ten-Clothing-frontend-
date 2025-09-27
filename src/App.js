@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-// User Components
+
 import HomePage from "./components/HomePage";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -20,7 +20,7 @@ import ProductDetails from "./components/ProductDetails";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
-// Admin Components
+
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminLogin from "./components/admin/AdminLogin";
 import AdminRegister from "./components/admin/AdminRegister";

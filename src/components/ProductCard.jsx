@@ -1,8 +1,12 @@
+// ProductCard.jsx
 import React, { useState } from "react";
 import { FaHeart } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./ProductCard.css";
+
+// Use .env variable (for Vite projects)
+const BASE_URL = "http://localhost:5000";
 
 const ProductCard = ({
   product,
@@ -16,17 +20,17 @@ const ProductCard = ({
   if (!product) return null;
 
   const handleWishlistClick = (e) => {
-    e.preventDefault();   // prevent link navigation when clicking heart
+    e.preventDefault();
     e.stopPropagation();
     setIsWishlisted((prev) => !prev);
 
     if (!isWishlisted) {
       toast.success(`${product.name} added to wishlist`, {
-        toastId: `wishlist-add-${product.id}`,
+        toastId: `wishlist-add-${product._id}`,
       });
     } else {
       toast.info(`${product.name} removed from wishlist`, {
-        toastId: `wishlist-remove-${product.id}`,
+        toastId: `wishlist-remove-${product._id}`,
       });
     }
 
@@ -37,11 +41,10 @@ const ProductCard = ({
     onAddToCart(product);
     toast.success(`${product.name} added to cart`);
   };
-
-  const productImage =
-    product.image && product.image.trim() !== ""
-      ? product.image
-      : "/images/placeholder.png";
+const productImage =
+  product.images && product.images.length > 0
+    ? `${BASE_URL}/uploads/${product.images[0]}`
+    : "/images/placeholder.png"; // fallback image
 
   const discountedPrice =
     product.discountPercentage > 0
@@ -52,24 +55,17 @@ const ProductCard = ({
 
   return (
     <div className="product-card" {...aosProps}>
-      <Link to={`/product/${product.id}`} className="product-link">
-        {/* ==== IMAGE + WISHLIST WRAPPER ==== */}
+      <Link to={`/product/${product._id}`} className="product-link">
         <div className="product-image">
           <img
             src={productImage}
-            alt={product.name || "Product"}
+            alt={product.name}
             className="product-img"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/images/placeholder.png";
+            }}
           />
-          {/* Rating Badge */}
-          {product.rating && (
-            <div className="rating-badge">
-              <span className="star">★</span>
-              <span>{product.rating}</span>
-              <span className="count">| {product.reviews}k</span>
-            </div>
-          )}
-
-          {/* Wishlist Icon inside image */}
           <div
             className={`wishlist-icon ${isWishlisted ? "wishlisted" : ""}`}
             onClick={handleWishlistClick}

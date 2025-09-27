@@ -777,3 +777,46 @@
     text-align: center;
   }
 }
+.color-options {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.color-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  transition: 0.2s;
+}
+
+.color-circle.active {
+  border: 2px solid #000;
+}
+
+.white-border {
+  border: 1px solid #000; /* ensures white colors are visible */
+}
+/* Selected Color Preview */
+.selected-color-preview {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 8px; /* space between items */
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.color-circle-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #ccc; /* light border */
+}
+
+.color-name {
+  font-weight: 600;
+}
